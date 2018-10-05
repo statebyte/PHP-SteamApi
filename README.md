@@ -1,4 +1,4 @@
-# PHP-SteamApi
+# PHP-SteamApi [![Build Status](https://travis-ci.org/theelsaud/PHP-SteamApi.svg?branch=release)](https://travis-ci.org/theelsaud/PHP-SteamApi)
 PHP класс для работы со SteamApi а также SteamID
 
 ### Функции
