@@ -285,7 +285,7 @@ class SteamApi
 		if(empty($gameid))
 		throw new Exception(self::message_game);
 
-		$url = "http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=".$this->api_key."&appid=".$gameid;
+		$url = "https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=".$this->api_key."&appid=".$gameid;
 		$urljson = file_get_contents($url);
 		$data = (array) json_decode($urljson);
 
