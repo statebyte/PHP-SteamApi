@@ -4,9 +4,10 @@ PHP класс для работы со SteamApi а также SteamID
 ### Функции
 В классе и в API имя метода совпадают с именем функции.
 
-| Function | Discription |
-| ------ | ------ |
-| GetPlayerSummaries  | Информация об аккаунте |
+| Function | Discription | STEAM WEB API |
+| ------ | ------ | ------ |
+| render()  | Возвращяет  CommunityID, SteamID, SteamID3, URL | no |
+| GetPlayerSummaries()  | Информация об аккаунте | yes |
 
 ### Установка
 
