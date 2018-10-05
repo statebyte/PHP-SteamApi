@@ -15,7 +15,7 @@ PHP класс для работы со SteamApi а также SteamID
 require "../SteamApi.php";
 ```
 
-### Работа
+### Пример
 
 ```php
 try{
