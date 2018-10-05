@@ -1,2 +1,8 @@
 # PHP-SteamApi
-Класс PHP для работы со SteamApi а также SteamID
+PHP класс для работы со SteamApi а также SteamID
+
+### Функции
+
+### Установка
+
+### Работа
