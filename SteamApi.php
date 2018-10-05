@@ -3,7 +3,7 @@
  * Discription:
  * PHP класс для работы со SteamApi а также SteamID
  * 
- * Version: v.1.0.0 
+ * Version: v.1.0.1
  * 
  * Где брать ключ:
  * {@link https://steamcommunity.com/dev/apikey}
