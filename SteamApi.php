@@ -1,9 +1,16 @@
 <?php
+namespace app\libs;
+
+//use Exception;
+//use SteamID;
+
 /**
  * Discription:
  * PHP класс для работы со SteamApi а также SteamID
  * 
- * Version: v.1.0.1
+ * Version: v.1.0.0 
+ * 
+ * Для работы нужно будет SteamID Library by xPaw
  * 
  * Где брать ключ:
  * {@link https://steamcommunity.com/dev/apikey}
@@ -23,29 +30,33 @@ class SteamApi
 	public $api_key; 
 	public $account_key;
 	
-	public $type_key;
-	public $communityid; 
+	public $type_key = false;
+	public $communityid = false; 
 
 	const message_api = "<a href='https://steamcommunity.com/dev/apikey'>Steam Web API Key</a> не был задан...";
 	const message_game = "ID игры не был задан...";
+
+	public $error_message = null;
 
 	public function __construct($account_key, $api_key = NULL)
 	{
 		if(empty($account_key))
 		{
-			throw new Exception("Не задан ключ...");
+			$this->error_message = "Ключ не задан...";
+			return false;
 		}
 		if(!empty($api_key))
 			$this->api_key = $api_key;
 
 		$this->account_key = $account_key;
-		$this->check();
+		//$this->check();
 	}
 
 	public function check()
 	{
 		$issid = substr($this->account_key, 0, 5);
 		$isurl = substr($this->account_key, 0, 4);
+		$isuid = substr($this->account_key, 0, 2);
 
 		$pattern = "/^(7656119)([0-9]{10})$/";
 		$iscid = preg_match($pattern, $this->account_key, $match);
@@ -53,7 +64,7 @@ class SteamApi
 		if($issid == 'STEAM'){
 
 			$this->steamid = $this->account_key;
-			$cid = $this->steamidto64($cid);
+			$cid = $this->steamidto64($this->steamid);
 			$this->communityid = (int) $cid;
 
 			$this->type_key = "steamid";
@@ -83,7 +94,8 @@ class SteamApi
 					return $this->data_return();
 				}
 
-				throw new Exception("Не удалось определить url");
+				$this->error_message = "Не удалось определить url";
+				return false;
 			}
 
 			if($ifurl){
@@ -97,7 +109,8 @@ class SteamApi
 				return $this->data_return();
 			}
 
-			throw new Exception("Не удалось определить url");
+			$this->error_message = "Не удалось определить url";
+			return false;
 
 		}elseif($iscid){
 
@@ -105,17 +118,29 @@ class SteamApi
 
 			$this->type_key = "communityid";
 			return $this->data_return();
+
+		}elseif($isuid == "[U" OR $isuid == "U:")
+		{
+			if($isuid == "U:")
+				$this->account_key = "[".$this->account_key."]";
+
+			$this->communityid = $this->steamid3to64($this->account_key);
+
+			$this->type_key = "uid";
+
+			return $this->data_return();
 		}
 
-		throw new Exception("Ключ является неверным");
+		$this->error_message = "Ключ не определяется...";
+		return false;
 	}
 	
 	public function data_return()
 	{
-		return array("communityid" => $this->communityid, "type" => $this->type_key );
+		return array("communityid" => $this->communityid, "type" => $this->type_key, "error_message" => $this->error_message, );
 	} 
 
-	// STEAM ID
+	// STEAM ID ---------------------------------------------------------------------
 
 	public function render()
 	{
@@ -170,7 +195,23 @@ class SteamApi
 		return $account_id;
 	}
 
-	// STEAM API
+	public function steamid3to64($steamid3)
+	{
+		$args = explode(":", $steamid3);
+		$accountid = substr($args[2], 0, -1);
+
+		if (($accountid % 2) == 0) {
+			$Y = 0;
+			$Z = ($accountid / 2);
+		} else {
+			$Y = 1;
+			$Z = (($accountid - 1) / 2);
+		}
+
+		return "7656119".(($Z * 2) + (7960265728 + $Y));
+	}
+
+	// STEAM API --------------------------------------------------------------------------------------
 
 	public function GetPlayerSummaries()
 	{
@@ -275,7 +316,7 @@ class SteamApi
 		$data = (array) json_decode($urljson)->response;
 
 		return $data;
-	} 
+	}
 
 	public function GetSchemaForGame($gameid = null)
 	{
@@ -286,6 +327,18 @@ class SteamApi
 		throw new Exception(self::message_game);
 
 		$url = "https://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2/?key=".$this->api_key."&appid=".$gameid;
+		$urljson = file_get_contents($url);
+		$data = (array) json_decode($urljson);
+
+		return $data;
+	}
+
+	public function ISteamApps_UpToDateCheck($app_id, $version)
+	{
+		if(empty($app_id))
+		throw new Exception(self::message_game);
+
+		$url = "https://api.steampowered.com/ISteamApps/UpToDateCheck/v0001/?appid=".$app_id."&version=".$version;
 		$urljson = file_get_contents($url);
 		$data = (array) json_decode($urljson);
 
